@@ -1,0 +1,20 @@
+# === Python environment ===
+.venv/
+__pycache__/
+*.pyc
+
+# === Scraped data files (optional: remove if you want to track them) ===
+data/tds_content.json
+data/discourse_forum_posts.json
+
+# === Playwright user data and browser cache ===
+playwright_user_data/
+
+# === VSCode settings (optional) ===
+.vscode/
+.env
+image.png
+promptfoo-errors.log
+
+project-tds-virtual-ta-promptfoo.yaml
+WhatsApp Image 2025-06-10 at 18.24.23_b4a5b91d.jpg
