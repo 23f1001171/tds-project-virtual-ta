@@ -32,7 +32,7 @@ def embed_text(texts):
 def load_vectorstore(path="vectorstore"):
     dummy_embeddings = OpenAIEmbeddings(
         model="text-embedding-3-small",
-        api_key="sk-dummy-key",
+        api_key=AIPROXY_TOKEN,
         base_url="https://aiproxy.sanand.workers.dev/openai/v1"
     )
     return FAISS.load_local(path, dummy_embeddings, allow_dangerous_deserialization=True)
