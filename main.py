@@ -1,43 +1,48 @@
-# main.py (or your FastAPI entry file)
-
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from qa_pipeline import get_relevant_answer
 
 app = FastAPI()
 
-# Add this entire origins section to allow requests
-# from the evaluation website and local development.
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=["*"],  # In prod, restrict this
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Define your data models using Pydantic
+# Pydantic models
 class Link(BaseModel):
     text: str
     url: str
 
 class RequestBody(BaseModel):
     question: str
-    image: str | None = None # Optional image field
+    image: Optional[str] = None
 
 class ResponseBody(BaseModel):
     answer: str
     links: List[Link]
 
 
-@app.post("/")
+@app.post("/", response_model=ResponseBody)
 def handle_request(body: RequestBody) -> ResponseBody:
-    # Use your QA pipeline to get an answer
     answer_text, links = get_relevant_answer(body.question, body.image)
+    return ResponseBody(
+        answer=answer_text,
+        links=[Link(text=link["text"], url=link["url"]) for link in links]
+    )
 
+@app.post("/query", response_model=ResponseBody)
+async def query(request: Request) -> ResponseBody:
+    data = await request.json()
+    question = data.get("question", "")
+    image = data.get("image", None)
+
+    answer_text, links = get_relevant_answer(question, image)
     return ResponseBody(
         answer=answer_text,
         links=[Link(text=link["text"], url=link["url"]) for link in links]
@@ -46,13 +51,3 @@ def handle_request(body: RequestBody) -> ResponseBody:
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
-
-from fastapi import FastAPI, Request
-
-app = FastAPI()
-
-@app.post("/query")
-async def query(request: Request):
-    data = await request.json()
-    question = data.get("question", "")
-    return {"answer": f"You asked: {question}"}
