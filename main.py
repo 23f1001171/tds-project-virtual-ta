@@ -46,3 +46,13 @@ def handle_request(body: RequestBody) -> ResponseBody:
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+from fastapi import FastAPI, Request
+
+app = FastAPI()
+
+@app.post("/query")
+async def query(request: Request):
+    data = await request.json()
+    question = data.get("question", "")
+    return {"answer": f"You asked: {question}"}
